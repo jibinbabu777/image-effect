@@ -1,31 +1,31 @@
-import init, { grayscale } from './pkg/image_effect.js';
+async function init() {
+  let rustApp = null
 
-async function run() {
-    // Initialize the WASM module
-    await init();
-    console.log("WASM module initialized");
+  try {
+    rustApp = await import('../pkg')
+  } catch(err) {
+    console.error(err)
+    return;
+  }
 
-    const input = document.getElementById('upload');
-    const fileReader = new FileReader();
+  console.log(rustApp)
 
-    fileReader.onloadend = async () => {
-        let base64 = fileReader.result.replace(
-            /^data:image\/(jpg|png|jpeg);base64,/, ''
-        );
+  const input = document.getElementById('upload')
+  const fileReader = new FileReader()
 
-        try {
-            // Call the grayscale function
-            let imgDataUrl = await grayscale(base64);
-            console.log("Generated grayscale image:", imgDataUrl);
-            document.getElementById('new-img').setAttribute('src', imgDataUrl);
-        } catch (e) {
-            console.error("Error processing image:", e);
-        }
-    };
+  fileReader.onloadend = () => {
+    let base64 = fileReader.result.replace(
+      /^data:image\/(png|jpeg|jpg);base64,/, ''
+    )
+    let img_data_url = rustApp.grayscale(base64)
+    document.getElementById('new-img').setAttribute(
+      'src', img_data_url
+    )
+  }
 
-    input.addEventListener('change', () => {
-        fileReader.readAsDataURL(input.files[0]);
-    });
+  input.addEventListener('change', () => {
+    fileReader.readAsDataURL(input.files[0])
+  })
 }
 
-run();
+init()
